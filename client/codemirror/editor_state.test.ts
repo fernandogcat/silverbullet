@@ -1,5 +1,5 @@
 import { redoDepth, undo, undoDepth } from "@codemirror/commands";
-import { language, syntaxTree } from "@codemirror/language";
+import { indentUnit, language, syntaxTree } from "@codemirror/language";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import {
   EditorView,
@@ -82,6 +82,39 @@ test("editor theme follows the system preference when dark mode is unset", () =>
   } finally {
     globalThis.matchMedia = originalMatchMedia;
   }
+});
+
+test("indent unit follows the indentSize option", () => {
+  const unitFor = (size: unknown) => {
+    const client = clientStub();
+    (client as { config: unknown }).config = {
+      get: (key: string, fallback: unknown) =>
+        key === "indentSize" ? size : fallback,
+    };
+    return createEditorState(
+      client,
+      { kind: "page", pageName: "Example" },
+      "- item",
+      false,
+    ).facet(indentUnit);
+  };
+  expect(unitFor(2)).toBe("  ");
+  expect(unitFor(4)).toBe("    ");
+  // invalid values fall back to the default
+  expect(unitFor(0)).toBe("  ");
+  expect(unitFor(2.5)).toBe("  ");
+  expect(unitFor(9)).toBe("  ");
+  expect(unitFor("4")).toBe("  ");
+});
+
+test("indent unit defaults to two spaces", () => {
+  const state = createEditorState(
+    clientStub(),
+    { kind: "page", pageName: "Example" },
+    "- item",
+    false,
+  );
+  expect(state.facet(indentUnit)).toBe("  ");
 });
 
 test("page mode retains Markdown parsing and wrapping", () => {

@@ -129,6 +129,14 @@ export function createInactiveEditorState(
   });
 }
 
+// Spaces per indentation level (Tab, Shift-Tab, nested list continuation),
+// from the `indentSize` option. Anything but a whole number from 1 to 8 falls
+// back to the default of 2.
+function configuredIndentSize(client: Client): number {
+  const size = client.config.get<number>("indentSize", 2);
+  return Number.isInteger(size) && size >= 1 && size <= 8 ? size : 2;
+}
+
 export function buildSharedEditorExtensions(
   client: Client,
   mode: EditorMode,
@@ -143,7 +151,9 @@ export function buildSharedEditorExtensions(
   const regularKeyBindings = createRegularKeyBindings(client, mode);
 
   client.indentUnitCompartment = new Compartment();
-  const indentUnits = client.indentUnitCompartment.of(indentUnit.of("  "));
+  const indentUnits = client.indentUnitCompartment.of(
+    indentUnit.of(" ".repeat(configuredIndentSize(client))),
+  );
 
   client.undoHistoryCompartment = new Compartment();
   const undoHistory = client.undoHistoryCompartment.of([history()]);

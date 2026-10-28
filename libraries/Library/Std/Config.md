@@ -128,6 +128,16 @@ config.define("linkWriteFormat", {
   ui = { category = "Editor", label = "Link write format", priority = 2 },
 })
 
+config.define("indentSize", {
+  description = "Number of spaces per indentation level, used by Tab and Shift-Tab and when continuing nested lists",
+  type = "number",
+  default = 2,
+  minimum = 1,
+  maximum = 8,
+  multipleOf = 1,
+  ui = { category = "Editor", label = "Indent size", priority = -1 },
+})
+
 config.define("frontmatterFolding", {
   description = "Configure folding behavior for YAML frontmatter at the top of pages",
   type = "object",
